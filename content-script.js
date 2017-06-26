@@ -33,8 +33,19 @@ function addStep(path) {
     var content = $text.val();
     var tour_config_patt = new RegExp("tour-config");
     var uid_patt = new RegExp("uid");
-    if ('' !== path && !tour_config_patt.test(path) && !uid_patt.test(path)) {
-        content = content + '\n  - title: \'Step ' + nbSteps++ + '\'\n    element: \'' + path + '\'\n    content: \'\'\n    placement: \'\'\n    postclick: \n      - ' + path + '\n';
+    if (path !== lastPath && '' !== path && !tour_config_patt.test(path) && !uid_patt.test(path)) {
+        var tour_link_patt = new RegExp("tool-link");
+        content = content + '\n  - title: \'Step ' + nbSteps++ + '\'\n    content: \'\'\n    placement: \'\'\n    '
+        if (!tour_link_patt.test(path)) {
+          content = content + 'element: \'' + path + '\'\n    postclick: \n      - ' + path + '\n';
+        } else {
+          var tool_regex = /> a.(.*?).tool-link/g;
+          var match = tool_regex.exec(path);
+          var link = 'a[href$="/tool_runner?tool_id=' + match[1] + '"]';
+          content = content + 'position: \'right\'\n    preclick: \n      - \'' + link + '\'\n    postclick: \n      - \'#execute\'\n';
+        }
+        
+        lastPath = path;
     }
     $text.val(content);
 };
